@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Quiz de Futebol";
+}
+
+<div class="text-center mt-5">
+    <h1 class="display-4">Quiz de Futebol</h1>
+    <p>Teste seus conhecimentos respondendo algumas perguntas!</p>
+
+    <form asp-controller="Quiz" asp-action="Start" method="post">
+        @Html.AntiForgeryToken()
+        <button type="submit" class="btn btn-primary btn-lg">Começar</button>
+    </form>
+</div>

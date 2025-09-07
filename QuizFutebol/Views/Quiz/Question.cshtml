@@ -1,0 +1,129 @@
+﻿@model QuizFutebol.Models.Question
+
+@{
+    ViewData["Title"] = "Pergunta";
+    var feedback = TempData["Feedback"] as string;
+    var score = Context.Session.GetInt32("Score") ?? 0;
+    var totalQuestions = ViewBag.TotalQuestions;
+}
+
+<div class="container mt-5">
+    <!-- Contador de acertos -->
+    <div class="text-right mb-2" style="font-weight:bold; font-size:1.1rem;">
+        Acertos: @score / @totalQuestions
+    </div>
+
+    <!-- Feedback -->
+    @if (!string.IsNullOrEmpty(feedback))
+    {
+        <div class="alert alert-info">@feedback</div>
+    }
+
+    <!-- Cronômetro -->
+    <div id="timer" class="text-center mb-3" style="font-size:1.3rem; font-weight:bold; color:#ffcc00;">
+        Tempo restante: 30s
+    </div>
+
+    <!-- Pergunta -->
+    <h2 class="mb-4">@Model.Text</h2>
+
+    <!-- Formulário com alternativas como botões -->
+    <form asp-action="Answer" method="post" id="quizForm">
+        @Html.AntiForgeryToken()
+        <div class="d-grid gap-2">
+            @for (int i = 0; i < Model.Options.Count; i++)
+            {
+                <button type="submit" name="selectedOption" value="@i" class="btn btn-outline-light btn-lg">
+                    @Model.Options[i]
+                </button>
+            }
+        </div>
+    </form>
+</div>
+
+<!-- Cronômetro script -->
+<script>
+    let timeLeft = 10; // 10 segundos por pergunta
+    const timerDiv = document.getElementById('timer');
+    const form = document.getElementById('quizForm');
+
+    const timerInterval = setInterval(() => {
+        timerDiv.textContent = `Tempo restante: ${timeLeft}s`;
+        timeLeft--;
+
+        if (timeLeft < 0) {
+            clearInterval(timerInterval);
+            form.submit(); // envia automaticamente quando acabar o tempo
+        }
+    }, 1000);
+</script>
+
+<!-- Estilo escuro / claro -->
+<style>
+    body {
+        background-color: #121212;
+        color: #f1f1f1;
+    }
+    .container {
+        max-width: 600px;
+        margin: auto;
+        text-align: center;
+    }
+    .btn-outline-light {
+        border: 2px solid #f1f1f1;
+        color: #f1f1f1;
+        font-size: 1.1rem;
+        padding: 0.75rem;
+        transition: 0.2s;
+    }
+    .btn-outline-light:hover {
+        background-color: #1f6feb;
+        border-color: #1f6feb;
+        color: #fff;
+    }
+    .alert-info {
+        background-color: #333;
+        color: #fff;
+        border-color: #444;
+        font-weight: bold;
+    }
+
+    /* Modo claro */
+    .light-mode {
+        background-color: #f1f1f1;
+        color: #121212;
+    }
+    .light-mode .btn-outline-light {
+        border-color: #121212;
+        color: #121212;
+    }
+    .light-mode .btn-outline-light:hover {
+        background-color: #007bff;
+        color: #fff;
+    }
+    .light-mode .alert-info {
+        background-color: #e7f3fe;
+        color: #333;
+        border-color: #ccc;
+    }
+</style>
+
+<!-- Botão alternar modo -->
+<button id="toggleTheme" class="btn btn-secondary" style="position:fixed;top:10px;right:10px;">Alternar Modo</button>
+
+<script>
+    const toggle = document.getElementById('toggleTheme');
+    const body = document.body;
+
+    if(localStorage.getItem('theme') === 'light'){
+        body.classList.add('light-mode');
+    } else {
+        body.classList.add('dark-mode');
+    }
+
+    toggle.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        body.classList.toggle('light-mode');
+        localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
+    });
+</script>
